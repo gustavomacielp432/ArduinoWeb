@@ -52,12 +52,28 @@ public class HomeController {
 	}
 	
 	@RequestMapping(
+			value = "/conexao", 
+			method = RequestMethod.GET, 
+			//consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> testeConexao() {
+		try {
+			System.out.println("testando conexão");
+			return new ResponseEntity<String>("{\"retorno\":\""+HttpStatus.OK+"\"}",HttpStatus.OK);
+		}catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("{\"retorno\":\""+e.getMessage()+"\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@RequestMapping(
 			value ="/ligar",
 			method = RequestMethod.GET,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String>ligarMotor(@RequestParam String token){
 		try {
-			return enviaInfo("ligar");
+			System.out.println("ligar");
+			return enviaInfo("1");
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -71,7 +87,7 @@ public class HomeController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String>desligarMotor(@RequestParam String token){
 		try {
-			return enviaInfo("desligar");
+			return enviaInfo("0");
 			
 		}catch(Exception e) {
 			e.printStackTrace();
