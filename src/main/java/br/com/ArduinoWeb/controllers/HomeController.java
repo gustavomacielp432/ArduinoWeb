@@ -1,5 +1,6 @@
 package br.com.ArduinoWeb.controllers;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,6 +19,8 @@ import br.com.ArduinoWeb.service.HomeService;
 
 @Controller
 public class HomeController {
+	
+	private String portaSelecionada = "";
 	@RequestMapping(
 			value = "/status", 
 			method = RequestMethod.POST, 
@@ -56,9 +59,16 @@ public class HomeController {
 			method = RequestMethod.GET, 
 			//consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> testeConexao() {
+	public ResponseEntity<String> testeConexao(){//@RequestParam String portaSelecionada) {
 		try {
-			System.out.println("testando conexão");
+//			SerialPort[] portNames = SerialPort.getCommPorts();
+//			for(SerialPort porta:portNames) {
+//				if(porta.getSystemPortName().contains(portaSelecionada)) {
+//					this.portaSelecionada = porta.getSystemPortName();
+//					return new ResponseEntity<String>("{\"retorno\":\""+HttpStatus.OK+"\"}",HttpStatus.OK);
+//				}
+//			}
+			System.out.println("conectando...");
 			return new ResponseEntity<String>("{\"retorno\":\""+HttpStatus.OK+"\"}",HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -73,7 +83,7 @@ public class HomeController {
 	public ResponseEntity<String>ligarMotor(@RequestParam String token){
 		try {
 			System.out.println("ligar");
-			return enviaInfo("1");
+			return enviaInfo("status");
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -82,13 +92,33 @@ public class HomeController {
 	}
 	
 	@RequestMapping(
-			value ="/desligar",
+			value ="/fechar",
 			method = RequestMethod.GET,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String>desligarMotor(@RequestParam String token){
 		try {
-			return enviaInfo("0");
+			return enviaInfo("fechar");
 			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@RequestMapping(
+			value ="/portas",
+			method = RequestMethod.GET,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String>listarPortas(){
+		try {
+			SerialPort[] porta = SerialPort.getCommPorts();
+			JSONArray array = new JSONArray();
+			for(int i = 0;i<porta.length;i++) {
+				JSONObject obj = new JSONObject();
+				obj.put("porta"+i, porta[i].getSystemPortName());
+				array.put(obj);
+			}
+			return new ResponseEntity<String>(array.toString(),HttpStatus.OK);
 		}catch(Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
@@ -98,12 +128,16 @@ public class HomeController {
 	private ResponseEntity<String> enviaInfo(String envio) throws Exception {
 		HomeService homeService = new HomeService();
 		SerialPort[] portNames = SerialPort.getCommPorts();
-		SerialPort porta = portNames[0];
-		homeService.conectar(porta);
-		homeService.enviaInformacaoPorta(envio, porta);
-		String inf = homeService.carregaInformacaoPorta(porta);
-		homeService.fechar(porta);
-		System.out.println(inf);
-		return new ResponseEntity<String>(inf,HttpStatus.OK);
+		for(SerialPort porta:portNames) {
+			if(porta.getSystemPortName().contains(this.portaSelecionada)) {
+				homeService.conectar(porta);
+				homeService.enviaInformacaoPorta(envio, porta);
+				String inf = homeService.carregaInformacaoPorta(porta);
+				homeService.fechar(porta);
+				System.out.println(inf);
+				return new ResponseEntity<String>(inf,HttpStatus.OK);
+			}
+		}
+		return null;
 	}
 }
