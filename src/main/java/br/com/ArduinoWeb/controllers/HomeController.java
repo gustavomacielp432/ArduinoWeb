@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fazecast.jSerialComm.SerialPort;
 
@@ -21,13 +20,15 @@ import br.com.ArduinoWeb.service.HomeService;
 public class HomeController {
 	
 	private String portaSelecionada = "";
+	
+	
 	@RequestMapping(
 			value = "/status", 
 			method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> statusPost(
-			@RequestParam String token,
+			
 			@RequestBody String body) {
 		try {
 			JSONObject json = new JSONObject(body);
@@ -45,9 +46,9 @@ public class HomeController {
 			//consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> statusGet(
-			@RequestParam String token) {
+			) {
 		try {
-			return enviaInfo("1");
+			return enviaInfo("status");
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
@@ -77,13 +78,12 @@ public class HomeController {
 	}
 	
 	@RequestMapping(
-			value ="/ligar",
+			value ="/abrir",
 			method = RequestMethod.GET,
 			produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String>ligarMotor(@RequestParam String token){
+	public ResponseEntity<String>ligarMotor(){
 		try {
-			System.out.println("ligar");
-			return enviaInfo("status");
+			return enviaInfo("abrir");
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -95,7 +95,7 @@ public class HomeController {
 			value ="/fechar",
 			method = RequestMethod.GET,
 			produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String>desligarMotor(@RequestParam String token){
+	public ResponseEntity<String>desligarMotor(){
 		try {
 			return enviaInfo("fechar");
 			
