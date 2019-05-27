@@ -128,16 +128,17 @@ public class HomeController {
 	private ResponseEntity<String> enviaInfo(String envio) throws Exception {
 		HomeService homeService = new HomeService();
 		SerialPort[] portNames = SerialPort.getCommPorts();
-		for(SerialPort porta:portNames) {
-			if(porta.getSystemPortName().contains(this.portaSelecionada)) {
+		//for(SerialPort porta:portNames) {
+			//if(porta.getSystemPortName().contains(this.portaSelecionada)) {
+		SerialPort porta = portNames[0];
 				homeService.conectar(porta);
 				homeService.enviaInformacaoPorta(envio, porta);
 				String inf = homeService.carregaInformacaoPorta(porta);
 				homeService.fechar(porta);
 				System.out.println(inf);
 				return new ResponseEntity<String>(inf,HttpStatus.OK);
-			}
-		}
-		return null;
+			//}
+		//}
+		//return null;
 	}
 }
